@@ -4,7 +4,7 @@ use std::collections::{HashMap, BTreeMap};
 #[test]
 fn test_manager_creation1 (){
     let manager = MemoryManager::new(10);
-    let mut expected_block_list : BlockMap = BTreeMap::new();
+    let mut expected_block_list : BlockLists = BTreeMap::new();
     let expected_name_list : NameMap = HashMap::new();
     let expected_memory = vec![0; 10];
 
@@ -19,7 +19,7 @@ fn test_manager_creation1 (){
 #[test]
 fn test_manager_creation2 (){
     let manager = MemoryManager::new(1);
-    let mut expected_block_list : BlockMap = BTreeMap::new();
+    let mut expected_block_list : BlockLists = BTreeMap::new();
     let expected_name_list : NameMap = HashMap::new();
     let expected_memory = vec![0; 1];
 
@@ -33,7 +33,7 @@ fn test_manager_creation2 (){
 #[test]
 fn test_manager_creation3 (){
     let manager = MemoryManager::new(8);
-    let mut expected_block_list : BlockMap = BTreeMap::new();
+    let mut expected_block_list : BlockLists = BTreeMap::new();
     let expected_name_list : NameMap = HashMap::new();
     let expected_memory = vec![0; 8];
 

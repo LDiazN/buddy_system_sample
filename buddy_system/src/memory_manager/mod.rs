@@ -12,6 +12,7 @@ pub type BlockLists = BTreeMap<usize, Vec<Address>>;
 
 
 /// Data defining a symbol
+#[derive(Debug, PartialEq)]
 pub struct SymbolData {
     pub id : usize,
     pub position : Address,
@@ -19,6 +20,7 @@ pub struct SymbolData {
     pub chunk_size : usize
 }
 
+#[derive(Debug, PartialEq)]
 /// Memory manager object
 pub struct MemoryManager {
     memory : Memory,
@@ -28,6 +30,7 @@ pub struct MemoryManager {
 }
 
 /// Possible memory errors
+#[derive(Debug)]
 pub enum MemoryError {
     OutOfMemory,
     SymbolNotDefined,
@@ -36,6 +39,12 @@ pub enum MemoryError {
 
 impl MemoryManager {
 
+    /// Create a new memory manager that manages a chunk of memory with the provided capacity
+    /// ## Parameters
+    /// * `capacity` - how much memory will be managed by this manager
+    /// ---
+    /// ## Return
+    /// A memory manager a maximum memory of 'capacity'
     pub fn new(capacity : usize) -> MemoryManager {
         let mut manager = MemoryManager{
             memory : vec![0; capacity],
@@ -49,6 +58,7 @@ impl MemoryManager {
         manager
     }
 
+    /// Allocate Memory for 
     pub fn allocate(&mut self, name : String, size : usize) -> Result<Address, MemoryError> {
         
         // Check if too much requested memory to even bother
@@ -78,9 +88,9 @@ impl MemoryManager {
             let size = *block_size;
             self.create_chunks(pos + chunk_size, pos + size - 1);
 
+            self.next_available_id = (self.next_available_id + 1) % (usize::MAX - 1);
             return Ok(pos)
         }
-
 
         Err(MemoryError::OutOfMemory)
     }
@@ -105,15 +115,77 @@ impl MemoryManager {
     }
 
     pub fn show(&self) {
-        
+        self.show_memory();
+        self.show_variables();
+        self.show_blocks();
+    }
+
+    pub fn get_blocks(&self) -> &BlockLists {
+        &self.blocks
+    }
+
+    pub fn get_names(&self) -> &NameMap {
+        &self.names
+    }
+
+    pub fn get_memory(&self) -> &Memory {
+        &self.memory
+    }
+
+    fn show_memory(&self) {
+        let mut temp_mem = vec![0; self.memory.len()];
+
+        // create temporal simulated memory
+        for (_, data) in &self.names {
+            for i in data.position .. (data.position + data.chunk_size) {
+                temp_mem[i] = if i < data.position + data.size {data.id as isize} else {-1};
+            }
+        }
+
+        // print title
+        println!("[Memory]");
+        // print items. If it's unused memory, print a dot instead of its id
+        print!("    ");
+        for i in temp_mem {
+            print!("{} ", if i < 0 {String::from(".")} else {i.to_string()})
+        }
+
+        println!("");
+    }
+
+    fn show_variables(&self) {
+
+        // Print title
+        println!("[Variables]");
+
+        // Print actual variables
+        for (name, data) in &self.names{
+            println!("  {}", name);
+            println!("    id: {}, size: {}, chunk size: {}, position: {}", data.id, data.size, data.chunk_size, data.position);
+        }
+    }
+
+    fn show_blocks(&self) {
+        // Print title
+        println!("[Blocks]");
+
+        // print blocks
+        for (size, list) in &self.blocks {
+            println!("  Blocks of size: {}", size);
+            print!("   positions: ");
+            for i in list {
+                print!("{} ", i);
+            }
+            println!();
+        }
     }
 
     fn create_chunks(&mut self, start : usize, end : usize) {
 
         // Check if we actually have something to do
-        if end > start || start >= self.memory.len()  { return; }
+        if end < start || start >= self.memory.len()  { return; }
 
-        let mut capacity = end - start;
+        let mut capacity = end - start + 1;
         let mut i = start;
 
         while capacity > 0 && i <= end {
