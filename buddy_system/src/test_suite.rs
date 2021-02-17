@@ -1,4 +1,5 @@
 use crate::memory_manager::*;
+#[allow(unused)]
 use std::collections::{HashMap, BTreeMap};
 
 #[test]

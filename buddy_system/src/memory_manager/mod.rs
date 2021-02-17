@@ -1,3 +1,4 @@
+
 use std::collections::{HashMap, BTreeMap};
 use crate::utils;
 
@@ -37,8 +38,9 @@ pub enum MemoryError {
     AlreadyExistingSymbol
 }
 
+#[allow(unused)] // this is a library, not going to use any of this in this module
 impl MemoryManager {
-
+    
     /// Create a new memory manager that manages a chunk of memory with the provided capacity
     /// ## Parameters
     /// * `capacity` - how much memory will be managed by this manager
@@ -58,7 +60,13 @@ impl MemoryManager {
         manager
     }
 
-    /// Allocate Memory for 
+    /// Allocate 'size' Memory for a variable called 'name'
+    /// ## Parameters
+    /// * `name` - String, new variable name to insert.
+    /// * `size` - how many bytes of memory to store
+    /// ---
+    /// ## Return
+    /// Memory Position for the new variable, or an error if something happened
     pub fn allocate(&mut self, name : String, size : usize) -> Result<Address, MemoryError> {
         
         // Check if too much requested memory to even bother
@@ -95,6 +103,12 @@ impl MemoryManager {
         Err(MemoryError::OutOfMemory)
     }
 
+    /// Free memory for a variable named 'name', so that this memory is available afterwards.
+    /// ## Parameters
+    /// * `name` - Variable name
+    /// ---
+    /// ## Return
+    /// Nothing, or an error if something happened. 
     pub fn free(&mut self, name : &String) -> Result<(),MemoryError>{
 
         // get data for this symbol and then delete it 
@@ -114,24 +128,29 @@ impl MemoryManager {
         Ok(())
     }
 
+    /// Show a friendly view of the manager state
     pub fn show(&self) {
         self.show_memory();
         self.show_variables();
         self.show_blocks();
     }
 
+    /// Get a reference to the BlockList object
     pub fn get_blocks(&self) -> &BlockLists {
         &self.blocks
     }
 
+    /// Get a reference to the NameMap object
     pub fn get_names(&self) -> &NameMap {
         &self.names
     }
 
+    /// Get the current memory state
     pub fn get_memory(&self) -> &Memory {
         &self.memory
     }
 
+    /// print just the memory
     fn show_memory(&self) {
         let mut temp_mem = vec![0; self.memory.len()];
 
@@ -153,6 +172,7 @@ impl MemoryManager {
         println!("");
     }
 
+    // print only variables
     fn show_variables(&self) {
 
         // Print title
@@ -165,6 +185,7 @@ impl MemoryManager {
         }
     }
 
+    // print blocks state
     fn show_blocks(&self) {
         // Print title
         println!("[Blocks]");
@@ -180,6 +201,7 @@ impl MemoryManager {
         }
     }
 
+    // Create the minimum possible ammount of memory blocks in the provided range
     fn create_chunks(&mut self, start : usize, end : usize) {
 
         // Check if we actually have something to do
@@ -197,11 +219,13 @@ impl MemoryManager {
         }
     }
 
+    // Insert a chunk of size 'size' in position 'position'
     fn insert_chunk(&mut self, size : usize, position : usize) {
         let entry  = self.blocks.entry(size).or_insert(vec![]);
         entry.push(position);
     }
 
+    // Check if this name is stored as a symbol 
     pub fn is_symbol(&self, name : &String) -> bool{
         self.names.contains_key(name)
     }
