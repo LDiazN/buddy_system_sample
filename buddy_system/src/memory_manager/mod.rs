@@ -31,7 +31,7 @@ pub struct MemoryManager {
 }
 
 /// Possible memory errors
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum MemoryError {
     OutOfMemory,
     SymbolNotDefined,
