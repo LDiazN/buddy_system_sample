@@ -1,3 +1,4 @@
+#[allow(unused)]
 use crate::memory_manager::*;
 #[allow(unused)]
 use std::collections::{HashMap, BTreeMap};
@@ -55,6 +56,29 @@ fn test_should_allocate_mem() {
 }
 
 #[test]
+fn test_should_run_out_of_memory() {
+    let mut manager = MemoryManager::new(20);
+    // allocating too much memory should break
+    
+    assert!(manager.allocate(String::from("x"), 8).is_ok());
+    assert!(manager.allocate(String::from("z"), 8).is_ok());
+    assert_eq!(manager.allocate(String::from("y"), 8), Err(MemoryError::OutOfMemory));
+}
+
+#[test]
+fn test_symbol_available() {
+    let mut manager = MemoryManager::new(20);
+    // allocating should make symbol available
+
+    let _ = manager.allocate(String::from("x"), 4);
+
+    let names = manager.get_names();
+
+    assert_ne!(names.get(&String::from("x")), None);
+}
+
+
+#[test]
 fn test_should_scream_too_much_memory() {
     let mut manager = MemoryManager::new(20);
 
@@ -82,7 +106,7 @@ fn test_should_scream_already_created() {
 }
 
 #[test]
-fn test_delete_ok() {
+fn test_free_ok() {
     let mut manager = MemoryManager::new(20);
 
     
@@ -92,7 +116,7 @@ fn test_delete_ok() {
 
 
 #[test]
-fn test_delete_not_available() {
+fn test_free_not_available() {
     let mut manager = MemoryManager::new(20);
 
     // Symbol should not be available after free
@@ -102,4 +126,12 @@ fn test_delete_not_available() {
     let names = manager.get_names();
 
     assert_eq!(names.get(&String::from("x")), None);
+}
+
+#[test]
+fn test_free_should_scream_not_defined() {
+    let mut manager = MemoryManager::new(20);
+
+    // should scream on symbol not defined 
+    assert_eq!(manager.free(&String::from("internet_de_cantv")), Err(MemoryError::SymbolNotDefined));
 }
